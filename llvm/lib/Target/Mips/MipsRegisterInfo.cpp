@@ -106,16 +106,30 @@ MipsRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
   }
 
   // O32 ABI
+  if (Subtarget.isABI_O32()) {
+    if (Subtarget.isSingleFloat())
+      return CSR_O32_SingleFloat_SaveList;
+
+    if (Subtarget.isFP64bit())
+      return CSR_O32_FP64_SaveList;
+
+    if (Subtarget.isFPXX())
+      return CSR_O32_FPXX_SaveList;
+
+    return CSR_O32_SaveList;
+  }
+
+  // O64 ABI
   if (Subtarget.isSingleFloat())
-    return CSR_O32_SingleFloat_SaveList;
+    return CSR_O64_SingleFloat_SaveList;
 
   if (Subtarget.isFP64bit())
-    return CSR_O32_FP64_SaveList;
+    return CSR_O64_FP64_SaveList;
 
   if (Subtarget.isFPXX())
-    return CSR_O32_FPXX_SaveList;
+    return CSR_O64_FPXX_SaveList;
 
-  return CSR_O32_SaveList;
+  return CSR_O64_SaveList;
 }
 
 const uint32_t *

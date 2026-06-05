@@ -90,6 +90,11 @@ public:
       ABI = Name;
       return true;
     }
+    if (Name == "o64") {
+      setO64ABITypes();
+      ABI = Name;
+      return true;
+    }
 
     if (Name == "n32") {
       setN32ABITypes();
@@ -115,6 +120,19 @@ public:
     PtrDiffType = IntPtrType = SignedInt;
     SizeType = UnsignedInt;
     SuitableAlign = 64;
+  }
+
+  void setO64ABITypes() {
+    Int64Type = SignedLongLong;
+    IntMaxType = Int64Type;
+    LongDoubleFormat = &llvm::APFloat::IEEEquad();
+    LongDoubleWidth = LongDoubleAlign = 128;
+    LongWidth = LongAlign = 64;
+    MaxAtomicPromoteWidth = MaxAtomicInlineWidth = 64;
+    PointerWidth = PointerAlign = 64;
+    PtrDiffType = IntPtrType = SignedLong;
+    SizeType = UnsignedLong;
+    SuitableAlign = 128;
   }
 
   void setN32N64ABITypes() {
@@ -416,13 +434,13 @@ public:
         {{"gp"}, "$28"}, {{"sp", "$sp"}, "$29"}, {{"fp", "$fp"}, "$30"},
         {{"ra"}, "$31"}
     };
-    if (ABI == "o32")
+    if (ABI == "o64" || ABI == "o32")
       return llvm::ArrayRef(O32RegAliases);
     return llvm::ArrayRef(NewABIRegAliases);
   }
 
   bool hasInt128Type() const override {
-    return (ABI == "n32" || ABI == "n64") || getTargetOpts().ForceEnableInt128;
+    return (ABI == "o64" || ABI == "n32" || ABI == "n64") || getTargetOpts().ForceEnableInt128;
   }
 
   unsigned getUnwindWordWidth() const override;
